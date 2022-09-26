@@ -8,7 +8,8 @@ def load_pdbbind_data_index(index_filename):
 
     index.drop(columns='slashes', inplace=True)
     index['ligand name'] = index.apply(lambda row:  row['ligand name'][1:][:-1], axis=1)
-    index = index.reset_index()
+
+    index['homology calculated?'] = [False] * len(index)
 
     return index
 
