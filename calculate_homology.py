@@ -1,3 +1,4 @@
+# Calculates the persistence homology of a certain protein/ligand
 # Usage: python calculate_homology.py --input sth.(pdb/mol2) --output sth.pckl
 
 import argparse
@@ -23,6 +24,7 @@ persistence = VietorisRipsPersistence(
     metric="euclidean",
     homology_dimensions=homology_dimensions,
     collapse_edges=True,
+    max_edge_length=10 # otherwise some proteins break the interaction
 )
 
 if input_file.suffix[1:] == 'pdb':

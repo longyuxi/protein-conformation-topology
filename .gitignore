@@ -4,3 +4,7 @@ __pycache__
 
 computed_homologies
 cmds.tmp
+
+.ipynb_checkpoints
+lightning_logs
+wandb
