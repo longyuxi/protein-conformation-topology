@@ -6,7 +6,7 @@ import pickle
 from pathlib import Path
 
 from gtda.homology import VietorisRipsPersistence
-from dataset import get_pdb_coordinates, get_mol2_coordinates
+from preprocessing import get_pdb_coordinates, get_mol2_coordinates
 
 parser = argparse.ArgumentParser(description='Calculate persistence homology for up to dimension 2 given pdb or mol2 file')
 parser.add_argument('--input', type=str, help='pdb or mol2 input file')

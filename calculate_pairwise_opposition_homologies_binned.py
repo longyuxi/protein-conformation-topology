@@ -2,7 +2,7 @@
 # Usage: python calculate_pairwise_opposition_homologies_binned.py --protein protein_file.pdb --ligand ligand_file.mol2 --output pl_opposition.pckl
 
 import numpy as np
-from dataset import get_mol2_coordinates_by_element, get_pdb_coordinates_by_element
+from preprocessing import get_mol2_coordinates_by_element, get_pdb_coordinates_by_element
 from gtda.homology import VietorisRipsPersistence
 import argparse
 import pickle

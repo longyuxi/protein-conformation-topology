@@ -1,5 +1,5 @@
 # %%
-from dataset import load_pdbbind_data_index
+from preprocessing import load_pdbbind_data_index
 import socket
 
 if 'dcc' in socket.gethostname():
