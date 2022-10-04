@@ -54,7 +54,7 @@ def get_pdb_coordinates_by_element(file, element) -> np.ndarray:
             coords.append(list(atom.get_vector()))
 
     if len(coords) == 0:
-        return None
+        return np.array([]).reshape(0, 3)
 
     coords = np.array(coords)
     coords = np.round(coords, 5)
@@ -94,7 +94,8 @@ def get_mol2_coordinates_by_element(file, element) -> np.ndarray:
             coords.append(pmol.df.loc[idx, ['x', 'y', 'z']].to_numpy())
 
     if len(coords) == 0:
-        return None
+        return np.array([]).reshape(0, 3)
+
     coords = np.array(coords)
     return coords
 
