@@ -24,6 +24,8 @@ with open(sbatch_template_file, 'r') as f:
     # echo the line to both stdout and stderr by echo "foo" | tee /dev/stderr
     # replace {COMMAND} with this line
 
+import os
+
 for idx, line in enumerate(lines):
     commands = f'echo "{line}" | tee /dev/stderr\n' + line
     # Replace output placeholders
@@ -32,6 +34,10 @@ for idx, line in enumerate(lines):
 
     # Replace command placeholders
     out_sbatch_content = out_sbatch_content.replace('%COMMAND%', commands)
-    with open(temp_sh_folder / f'job_{idx}.sh', 'w') as o:
+    out_sbatch_file = temp_sh_folder / f'job_{idx}.sh'
+    with open(out_sbatch_file, 'w') as o:
         o.write(out_sbatch_content)
+
+    # submit job
+    os.system(f'sbatch {out_sbatch_file}')
 

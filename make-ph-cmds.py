@@ -13,7 +13,7 @@ index = load_pdbbind_data_index(index_location)
 
 ## For debug purposes
 
-index = index[:10]
+# index = index[:3]
 
 # %% [markdown]
 # ### Calculating the persistence diagram of each of the coordinates and storing them
