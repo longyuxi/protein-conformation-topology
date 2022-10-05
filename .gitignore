@@ -4,6 +4,7 @@ __pycache__
 
 computed_homologies
 cmds.tmp
+sbatch_tmp
 
 .ipynb_checkpoints
 lightning_logs
