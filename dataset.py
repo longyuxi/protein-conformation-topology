@@ -28,13 +28,57 @@ class ProteinPersistenceHomologyDataset(Dataset):
         # pocket_ph = pickle.load(open(item_base_folder / 'pocket.pckl', 'rb'))
         # ligand_ph = pickle.load(open(item_base_folder / 'ligand.pckl', 'rb'))
         pw_opposition = pickle.load(open(item_base_folder / 'pairwise_opposition.pckl', 'rb'))
+        other_2345_homologies = pickle.load(open(item_base_folder / '2345_homology.pckl', 'rb'))
         pw_opposition = torch.from_numpy(pw_opposition)
 
         # get binding affinity
         binding_affinity = self.index.loc[idx, '-logKd/Ki']
         binding_affinity = torch.tensor([binding_affinity], dtype=torch.float32)
 
-        return pw_opposition, binding_affinity
+        return [pw_opposition, other_2345_homologies], binding_affinity
+
+class WeiDataset(ProteinPersistenceHomologyDataset):
+    # Implemented almost exactly like the one described by Cang and Wei
+    def __init__(self,
+        index: pd.DataFrame,
+        homology_base_folder : str = "computed_homologies",
+        normalize=True):
+
+        self.normalize = normalize
+
+        super().__init__(index, homology_base_folder)
+
+    def __getitem__(self, idx):
+        homologies, binding_affinity = super().__getitem__(idx)
+
+        # For pairwise, we only keep Betti-0 and birth (TODO: check that Betti-0's die at the same time)
+        pw_opposition = homologies[0] # shape torch.Size([36, 201, 3, 3])
+        pw_opposition = pw_opposition[:, :, 0, 0] # now should be of shape torch.Size([36, 201])
+
+        # For 2345, we only wish to keep the Betti-1 and Betti-2. For each of them, flatten the last dimension.
+        raw_2345_homologies = homologies[1]
+        final_2345_homologies = [] # used as output
+        for hom in raw_2345_homologies:
+            # iterate through 2345 and doing the same thing
+
+            # hom is of shape ndarray(201, 3, 3)
+            hom = hom[:, 1:3, :] # shape ndarray(201, 2, 3)
+            hom = hom.reshape(201, 6)
+
+            final_2345_homologies.append(hom)
+
+        # A lot of reshaping to get it into shape (24, 201)
+        final_2345_homologies = np.array(final_2345_homologies) # (4, 201, 6)
+        final_2345_homologies = np.swapaxes(final_2345_homologies, 0, 1) # (201, 4, 6)
+        final_2345_homologies = final_2345_homologies.reshape(201, 24)
+        final_2345_homologies = np.swapaxes(final_2345_homologies, 0, 1)
+
+        final_2345_homologies = torch.tensor(final_2345_homologies, dtype=torch.float)
+
+        # Finally, concatenate the pairwise homologies and the 2345 homologies to end up with a tensor of shape (60, 201)
+        out = torch.concat((pw_opposition, final_2345_homologies), dim=0)
+
+        return out, binding_affinity
 
 class CollapsedPairwiseOppositionDataset(ProteinPersistenceHomologyDataset):
     def __init__(self,
@@ -47,7 +91,8 @@ class CollapsedPairwiseOppositionDataset(ProteinPersistenceHomologyDataset):
         super().__init__(index, homology_base_folder)
 
     def __getitem__(self, idx):
-        pw_opposition, binding_affinity = super().__getitem__(idx)
+        homologies, binding_affinity = super().__getitem__(idx)
+        pw_opposition = homologies[0]
         collapsed_pw_opposition = torch.zeros((pw_opposition.shape[0], pw_opposition.shape[1]))
 
         for i in range(len(collapsed_pw_opposition)):
@@ -70,7 +115,7 @@ class ProteinHomologyDataModule(pl.LightningDataModule):
         self.index = index
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.dataset = CollapsedPairwiseOppositionDataset(index, homology_base_folder)
+        self.dataset = WeiDataset(index, homology_base_folder)
 
     def setup(self, stage: str):
         # Assign train/val datasets for use in dataloaders
