@@ -9,3 +9,4 @@ sbatch_tmp
 .ipynb_checkpoints
 lightning_logs
 wandb
+plots

@@ -1,3 +1,5 @@
+"""Script for generating 'cmds.tmp' to be fed into GNU Parallel
+"""
 # %%
 from preprocessing import load_pdbbind_data_index
 import socket
